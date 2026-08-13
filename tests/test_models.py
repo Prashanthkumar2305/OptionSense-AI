@@ -1,6 +1,11 @@
-from datetime import date
+from datetime import date, datetime
 
-from backend.database.models import Company, MarketPrice, OptionContract
+from backend.database.models import (
+    Company,
+    MarketPrice,
+    OptionChainSnapshot,
+    OptionContract,
+)
 
 
 def test_company_model() -> None:
@@ -78,3 +83,29 @@ def test_option_type_values() -> None:
 
     assert call.option_type == "CE"
     assert put.option_type == "PE"
+
+
+def test_option_chain_snapshot_model() -> None:
+    snapshot = OptionChainSnapshot(
+        contract_id=1,
+        snapshot_timestamp=datetime(2026, 8, 13, 10, 30),
+        underlying_price=2515.0,
+        last_price=42.50,
+        bid_price=42.25,
+        ask_price=42.75,
+        volume=50000,
+        open_interest=125000,
+        oi_change=15000,
+        implied_volatility=0.225,
+    )
+
+    assert snapshot.contract_id == 1
+    assert snapshot.snapshot_timestamp == datetime(2026, 8, 13, 10, 30)
+    assert snapshot.underlying_price == 2515.0
+    assert snapshot.last_price == 42.50
+    assert snapshot.bid_price == 42.25
+    assert snapshot.ask_price == 42.75
+    assert snapshot.volume == 50000
+    assert snapshot.open_interest == 125000
+    assert snapshot.oi_change == 15000
+    assert snapshot.implied_volatility == 0.225

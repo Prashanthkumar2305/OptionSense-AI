@@ -185,3 +185,83 @@ class OptionContract(Base):
             "option_type",
         ),
     )
+
+
+class OptionChainSnapshot(Base):
+    """Represents market data for an option contract at a point in time."""
+
+    __tablename__ = "option_chain_snapshots"
+
+    id: Mapped[int] = mapped_column(
+        primary_key=True,
+        autoincrement=True,
+    )
+
+    contract_id: Mapped[int] = mapped_column(
+        ForeignKey("option_contracts.id"),
+        nullable=False,
+    )
+
+    snapshot_timestamp: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+    )
+
+    underlying_price: Mapped[float] = mapped_column(
+        Numeric(15, 4),
+        nullable=False,
+    )
+
+    last_price: Mapped[float] = mapped_column(
+        Numeric(15, 4),
+        nullable=False,
+    )
+
+    bid_price: Mapped[float | None] = mapped_column(
+        Numeric(15, 4),
+        nullable=True,
+    )
+
+    ask_price: Mapped[float | None] = mapped_column(
+        Numeric(15, 4),
+        nullable=True,
+    )
+
+    volume: Mapped[int] = mapped_column(
+        nullable=False,
+    )
+
+    open_interest: Mapped[int] = mapped_column(
+        nullable=False,
+    )
+
+    oi_change: Mapped[int] = mapped_column(
+        nullable=False,
+    )
+
+    implied_volatility: Mapped[float | None] = mapped_column(
+        Numeric(10, 6),
+        nullable=True,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+    )
+
+    __table_args__ = (
+        Index(
+            "ix_option_snapshots_contract_id",
+            "contract_id",
+        ),
+        Index(
+            "ix_option_snapshots_timestamp",
+            "snapshot_timestamp",
+        ),
+        Index(
+            "ix_option_snapshots_contract_timestamp",
+            "contract_id",
+            "snapshot_timestamp",
+        ),
+    )
