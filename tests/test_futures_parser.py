@@ -7,12 +7,7 @@ import pytest
 from backend.ingestion.legacy.futures_parser import parse_legacy_futures
 
 fixture_dir = (
-    Path(__file__).resolve().parents[1]
-    / "tests"
-    / "fixtures"
-    / "nse"
-    / "fo"
-    / "legacy"
+    Path(__file__).resolve().parents[1] / "tests" / "fixtures" / "nse" / "fo" / "legacy"
 )
 
 
