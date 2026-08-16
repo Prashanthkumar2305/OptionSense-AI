@@ -6,18 +6,25 @@ import pytest
 
 from backend.ingestion.legacy.futures_parser import parse_legacy_futures
 
-legacy_dir = Path("data/raw/nse/fo/legacy")
+fixture_dir = (
+    Path(__file__).resolve().parents[1]
+    / "tests"
+    / "fixtures"
+    / "nse"
+    / "fo"
+    / "legacy"
+)
 
 
 def test_parse_legacy_futures_05_july() -> None:
-    path = legacy_dir / "fo050724_extracted" / "fo050724.csv"
+    path = fixture_dir / "fo050724.csv"
 
     result = parse_legacy_futures(
         path,
         date(2024, 7, 5),
     )
 
-    assert len(result) == 557
+    assert len(result) == 5
     assert result["trade_date"].iloc[0] == pd.Timestamp("2024-07-05")
     assert result["contract"].notna().all()
     assert "open_interest" in result.columns
@@ -25,14 +32,14 @@ def test_parse_legacy_futures_05_july() -> None:
 
 
 def test_parse_legacy_futures_04_july() -> None:
-    path = legacy_dir / "fo040724_extracted" / "fo040724.csv"
+    path = fixture_dir / "fo040724.csv"
 
     result = parse_legacy_futures(
         path,
         date(2024, 7, 4),
     )
 
-    assert len(result) == 557
+    assert len(result) == 5
     assert result["trade_date"].iloc[0] == pd.Timestamp("2024-07-04")
 
 
