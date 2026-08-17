@@ -7,7 +7,7 @@ from datetime import datetime
 
 @dataclass(frozen=True)
 class OptionContract:
-    underylying: str
+    underlying: str
     expiry_date: datetime
     option_type: str
     strike_price: float
@@ -30,7 +30,7 @@ def parse_pattern_contract(contract: str) -> OptionContract:
         raise ValueError(f"Invalid option contract:{contract!r}")
 
     return OptionContract(
-        underylying=match.group("underlying"),
+        underlying=match.group("underlying"),
         expiry_date=datetime.strptime(
             match.group("expiry"),
             "%d-%b-%Y",
