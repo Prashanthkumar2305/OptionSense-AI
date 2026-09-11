@@ -85,7 +85,7 @@ def parse_udiff_options(
                 errors="coerce",
             ),
             "trade_count": pd.to_numeric(
-                df["TtlTradgVol"],
+                df["TtlNbOfTxsExctd"],
                 errors="coerce",
             ),
             "underlying_price": pd.to_numeric(
