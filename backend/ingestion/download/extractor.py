@@ -51,3 +51,41 @@ def extract_csv(zip_path: str | Path) -> Path:
 
     except BadZipFile as exc:
         raise DataSourceError(f"Invalid ZIP file:{zip_path}") from exc
+
+
+def extract_member(
+    zip_path: str | Path,
+    member_name: str,
+) -> Path:
+    """Extract a specific member from an NSE ZIP archive."""
+
+    zip_path = Path(zip_path)
+
+    if not zip_path.exists():
+        raise DataSourceError(f"NSE ZIP file not found: {zip_path}")
+
+    try:
+        with ZipFile(zip_path) as archive:
+            try:
+                member = archive.getinfo(member_name)
+            except KeyError as exc:
+                raise DataSourceError(f"ZIP member not found: {member_name}") from exc
+
+            member_path = posixpath.normpath(member.filename)
+
+            if (
+                member_path.startswith("../")
+                or member_path == ".."
+                or posixpath.isabs(member_path)
+            ):
+                raise DataSourceError(f"Unsafe ZIP member path: {member.filename}")
+
+            destination = zip_path.parent / Path(member.filename).name
+
+            with archive.open(member) as source:
+                destination.write_bytes(source.read())
+
+            return destination
+
+    except BadZipFile as exc:
+        raise DataSourceError(f"Invalid ZIP file: {zip_path}") from exc

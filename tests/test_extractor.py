@@ -3,7 +3,10 @@ from zipfile import ZipFile
 
 import pytest
 
-from backend.ingestion.download.extractor import extract_csv
+from backend.ingestion.download.extractor import (
+    extract_csv,
+    extract_member,
+)
 from backend.ingestion.exceptions import DataSourceError
 
 
@@ -101,3 +104,60 @@ def test_absolute_zip_path_is_rejected(tmp_path: Path) -> None:
 
     with pytest.raises(DataSourceError):
         extract_csv(zip_path)
+
+
+def test_extract_member_from_multi_csv_zip(tmp_path: Path) -> None:
+    zip_path = tmp_path / "legacy.zip"
+
+    with ZipFile(zip_path, "w") as archive:
+        archive.writestr(
+            "fo050724.csv",
+            "contract,close\nNIFTY,25000\n",
+        )
+        archive.writestr(
+            "op050724.csv",
+            "contract,close\nOPTNIFTY,100\n",
+        )
+
+    result = extract_member(
+        zip_path,
+        "op050724.csv",
+    )
+
+    expected = tmp_path / "op050724.csv"
+
+    assert result == expected
+    assert result.exists()
+    assert result.read_text() == "contract,close\nOPTNIFTY,100\n"
+
+
+def test_extract_member_not_found_raises_error(tmp_path: Path) -> None:
+    zip_path = tmp_path / "legacy.zip"
+
+    create_zip(
+        zip_path,
+        "fo050724.csv",
+        "contract,close\nNIFTY,25000\n",
+    )
+
+    with pytest.raises(DataSourceError):
+        extract_member(
+            zip_path,
+            "op050724.csv",
+        )
+
+
+def test_extract_member_path_traversal_is_rejected(tmp_path: Path) -> None:
+    zip_path = tmp_path / "malicious.zip"
+
+    with ZipFile(zip_path, "w") as archive:
+        archive.writestr(
+            "../../malicious.csv",
+            "malicious,data\n",
+        )
+
+    with pytest.raises(DataSourceError):
+        extract_member(
+            zip_path,
+            "../../malicious.csv",
+        )
