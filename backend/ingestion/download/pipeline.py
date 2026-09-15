@@ -11,6 +11,7 @@ from backend.ingestion.download.extractor import (
 from backend.ingestion.download.nse_downloader import (
     NSEDownloader,
     NSEFOSource,
+    resolve_download_url,
     resolve_file_spec,
 )
 
@@ -43,11 +44,12 @@ class NSEDownloadPipeline:
     def run(
         self,
         trade_date: date,
-        url: str,
     ) -> NSEDownloadResult:
         """Download and extract the NSE F&O file for a trading date..."""
 
         file_spec = resolve_file_spec(trade_date)
+
+        url = resolve_download_url(trade_date)
 
         zip_path = self.downloader.fetch(
             trade_date=trade_date,
@@ -64,14 +66,17 @@ class NSEDownloadPipeline:
                 csv_path=csv_path,
             )
 
+        if file_spec.futures_csv_name is None or file_spec.options_csv_name is None:
+            raise ValueError("Legacy NSE file specification is incomplete..")
+
         future_csv_path = extract_member(
             zip_path,
-            f"fo{trade_date.strftime('%d%m%y')}.csv",
+            file_spec.futures_csv_name,
         )
 
         options_csv_path = extract_member(
             zip_path,
-            f"op{trade_date.strftime('%d%m%y')}.csv",
+            file_spec.options_csv_name,
         )
 
         return NSEDownloadResult(

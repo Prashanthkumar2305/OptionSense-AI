@@ -68,7 +68,6 @@ def test_pipeline_extracts_udiff_csv(
 
     result = pipeline.run(
         trade_date=trade_date,
-        url="https://example.com/test.zip",
     )
 
     assert result.trade_date == trade_date
@@ -115,7 +114,6 @@ def test_pipeline_extracts_legacy_futures_and_options(
 
     result = pipeline.run(
         trade_date=trade_date,
-        url="https://example.com/test.zip",
     )
 
     assert result.trade_date == trade_date
@@ -153,7 +151,6 @@ def test_pipeline_raises_when_legacy_options_csv_is_missing(
     with pytest.raises(DataSourceError):
         pipeline.run(
             trade_date=trade_date,
-            url="https://example.com/test.zip",
         )
 
 
@@ -185,5 +182,4 @@ def test_pipeline_raises_when_legacy_futures_csv_is_missing(
     with pytest.raises(DataSourceError):
         pipeline.run(
             trade_date=trade_date,
-            url="https://example.com/test.zip",
         )

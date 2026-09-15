@@ -13,7 +13,7 @@ def test_legacy_raw_zip_path() -> None:
         Path("data/raw/nse/fo"),
     )
 
-    assert result == Path("data/raw/nse/fo/legacy/2024/fo050724.zip")
+    assert result == Path("data/raw/nse/fo/legacy/2024/fo05JUL2024bhav.csv.zip")
 
 
 def test_udiff_raw_zip_path() -> None:
@@ -36,7 +36,7 @@ def test_legacy_source_path_component() -> None:
     assert result.parts[-3:] == (
         NSEFOSource.LEGACY.value,
         "2024",
-        "fo050724.zip",
+        "fo05JUL2024bhav.csv.zip",
     )
 
 

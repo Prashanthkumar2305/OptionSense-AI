@@ -22,6 +22,7 @@ class NSEFOSource(StrEnum):
 # We'll keep this date explicit so the transition rule is easy to audit.
 
 UDIFF_START_DATE = date(2024, 7, 8)
+NSE_ARCHIVE_BASE_URL = "https://nsearchives.nseindia.com/content"
 
 
 @dataclass(frozen=True)
@@ -31,20 +32,24 @@ class NSEFileSpec:
     trade_date: date
     source: NSEFOSource
     zip_name: str
-    csv_name: str
+    csv_name: str | None = None
+    futures_csv_name: str | None = None
+    options_csv_name: str | None = None
 
 
 def resolve_file_spec(trade_date: date) -> NSEFileSpec:
     """Return the expected ZIP and CSV names for an NSE F&O Bhavcopy."""
 
     if trade_date < UDIFF_START_DATE:
+        ddmonyyyy = trade_date.strftime("%d%b%Y").upper()
         ddmmyy = trade_date.strftime("%d%m%y")
 
         return NSEFileSpec(
             trade_date=trade_date,
             source=NSEFOSource.LEGACY,
-            zip_name=f"fo{ddmmyy}.zip",
-            csv_name=f"fo{ddmmyy}.csv",
+            zip_name=f"fo{ddmonyyyy}bhav.csv.zip",
+            futures_csv_name=f"fo{ddmmyy}.csv",
+            options_csv_name=f"op{ddmmyy}.csv",
         )
 
     yyyymmdd = trade_date.strftime("%Y%m%d")
@@ -55,6 +60,22 @@ def resolve_file_spec(trade_date: date) -> NSEFileSpec:
         zip_name=f"BhavCopy_NSE_FO_0_0_0_{yyyymmdd}_F_0000.csv.zip",
         csv_name=f"BhavCopy_NSE_FO_0_0_0_{yyyymmdd}_F_0000.csv",
     )
+
+
+def resolve_download_url(trade_date: date) -> str:
+    """Return the NSE archive URL for an F&O trading date."""
+
+    file_spec = resolve_file_spec(trade_date)
+
+    if file_spec.source is NSEFOSource.LEGACY:
+        month = trade_date.strftime("%b").upper()
+
+        return (
+            f"{NSE_ARCHIVE_BASE_URL}/historical/DERIVATIVES/"
+            f"{trade_date.year}/{month}/{file_spec.zip_name}"
+        )
+
+    return f"{NSE_ARCHIVE_BASE_URL}/fo/{file_spec.zip_name}"
 
 
 def resolve_raw_zip_path(
